@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QPushButton, QSpinBox,
-    QTableWidget, QVBoxLayout, QHBoxLayout, QTableWidgetItem, QFileDialog
+    QTableWidget, QVBoxLayout, QHBoxLayout, QTableWidgetItem, QFileDialog,QHeaderView
 )
 from about import AboutWindow
 import os
@@ -33,7 +33,6 @@ class GradesWindow(QWidget):
         header_layout = QHBoxLayout()
         header_layout.addWidget(self.title_label)
         header_layout.addStretch()
-        header_layout.addWidget(self.about_button)
 
         self.load_button = QPushButton("Load Grades File")
         self.load_button.clicked.connect(self.load_file_clicked)
@@ -44,8 +43,10 @@ class GradesWindow(QWidget):
         file_layout.addWidget(self.file_label)
         file_layout.addStretch()
 
+        header_layout.addWidget(self.about_button)
         self.table = QTableWidget(50, 3)
         self.table.setHorizontalHeaderLabels(["ID", "Original Grades", "Corrected Grades"])
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         self.bonus_label = QLabel("Bonus Points (press Enter):")
         self.bonus_spin = QSpinBox()
@@ -156,6 +157,10 @@ class GradesWindow(QWidget):
 
 if __name__ == "__main__":
     app = QApplication()
+
+    with open("style.qss") as f:
+        app.setStyleSheet(f.read())
+
     window = GradesWindow()
     window.show()
     app.exec()
