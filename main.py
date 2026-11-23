@@ -3,7 +3,9 @@ from PySide6.QtWidgets import (
     QTableWidget, QVBoxLayout, QHBoxLayout, QTableWidgetItem, QFileDialog
 )
 from about import AboutWindow
-
+import os
+import sys
+import subprocess
 
 class GradesWindow(QWidget):
 
@@ -51,6 +53,7 @@ class GradesWindow(QWidget):
         self.bonus_spin.editingFinished.connect(self.bonus_entered)
 
         self.update_button = QPushButton("Update File")
+        self.update_button.clicked.connect(self.update_file_clicked)
 
         bottom_layout = QHBoxLayout()
         bottom_layout.addWidget(self.bonus_label)
@@ -125,6 +128,25 @@ class GradesWindow(QWidget):
         self.update_table()
         self.status_label.setText(f"חושבו ציונים מתוקנים עם תוספת של {bonus} נקודות.")
     
+    def update_file_clicked(self):
+        if self.selected_file == "":
+            self.status_label.setText("לא נבחר קובץ לעדכון.")
+            return
+
+        with open(self.selected_file, "w", encoding="utf-8") as f:
+            f.write(self.header_line + "\n")
+            for i in range(len(self.student_ids)):
+                f.write(f"{self.student_ids[i]},{self.corrected_grades[i]}\n")
+
+        self.status_label.setText("הקובץ עודכן ונפתח.")
+
+        if sys.platform == "win32":
+            os.startfile(self.selected_file)
+        elif sys.platform == "darwin":
+            subprocess.run(["open", self.selected_file])
+        else:
+            subprocess.run(["xdg-open", self.selected_file])
+
     def about_clicked(self):
         self.about_window.show()
 
