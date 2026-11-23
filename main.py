@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QPushButton, QSpinBox,
-    QTableWidget, QVBoxLayout, QHBoxLayout
+    QTableWidget, QVBoxLayout, QHBoxLayout, QTableWidgetItem, QFileDialog
 )
 from about import AboutWindow
 
@@ -34,6 +34,7 @@ class GradesWindow(QWidget):
         header_layout.addWidget(self.about_button)
 
         self.load_button = QPushButton("Load Grades File")
+        self.load_button.clicked.connect(self.load_file_clicked)
         self.file_label = QLabel("No file selected")
 
         file_layout = QHBoxLayout()
@@ -68,6 +69,44 @@ class GradesWindow(QWidget):
 
         self.setLayout(main_layout)
 
+    def load_file_clicked(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select Grades File", "", "CSV Files (*.csv)")
+        if file_path == "":
+            return
+
+        self.selected_file = file_path
+        self.file_label.setText(file_path)
+
+        self.student_ids = []
+        self.original_grades = []
+        self.corrected_grades = []
+
+        with open(self.selected_file, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        self.header_line = lines[0].strip()
+
+        for line in lines[1:]:
+            clean_line = line.strip()
+            if clean_line != "":
+                parts = clean_line.split(",")
+                student_id = parts[0].strip()
+                grade = int(float(parts[1].strip()))
+
+                self.student_ids.append(student_id)
+                self.original_grades.append(grade)
+                self.corrected_grades.append(grade)
+
+        self.update_table()
+        self.status_label.setText("הקובץ נטען בהצלחה.")
+
+    def update_table(self):
+        self.table.setRowCount(len(self.student_ids))
+        for i in range(len(self.student_ids)):
+            self.table.setItem(i, 0, QTableWidgetItem(str(self.student_ids[i])))
+            self.table.setItem(i, 1, QTableWidgetItem(str(self.original_grades[i])))
+            self.table.setItem(i, 2, QTableWidgetItem(str(self.corrected_grades[i])))
+    
     def about_clicked(self):
         self.about_window.show()
 
