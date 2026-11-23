@@ -48,6 +48,7 @@ class GradesWindow(QWidget):
         self.bonus_label = QLabel("Bonus Points (press Enter):")
         self.bonus_spin = QSpinBox()
         self.bonus_spin.setRange(0, 100)
+        self.bonus_spin.editingFinished.connect(self.bonus_entered)
 
         self.update_button = QPushButton("Update File")
 
@@ -106,6 +107,23 @@ class GradesWindow(QWidget):
             self.table.setItem(i, 0, QTableWidgetItem(str(self.student_ids[i])))
             self.table.setItem(i, 1, QTableWidgetItem(str(self.original_grades[i])))
             self.table.setItem(i, 2, QTableWidgetItem(str(self.corrected_grades[i])))
+
+    def bonus_entered(self):
+        if len(self.original_grades) == 0:
+            self.status_label.setText("יש לטעון קובץ ציונים תחילה.")
+            return
+
+        bonus = self.bonus_spin.value()
+        self.corrected_grades = []
+
+        for orig_grade in self.original_grades:
+            new_grade = orig_grade + bonus
+            if new_grade > 100:
+                new_grade = 100
+            self.corrected_grades.append(new_grade)
+
+        self.update_table()
+        self.status_label.setText(f"חושבו ציונים מתוקנים עם תוספת של {bonus} נקודות.")
     
     def about_clicked(self):
         self.about_window.show()
